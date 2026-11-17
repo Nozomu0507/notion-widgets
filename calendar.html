@@ -77,6 +77,12 @@
   .d.today span { background: var(--accent); color: #fff; font-weight: 600; }
   .d[title]::after { content: ""; position: absolute; bottom: 1px; width: 3px; height: 3px; border-radius: 50%; background: var(--sun); }
   .d.today[title]::after { background: var(--accent); }
+  @media (max-width: 280px) {
+    .card { padding: 14px 12px 10px; }
+    .d { font-size: 11.5px; }
+    .d span { width: 21px; height: 21px; }
+    .month b { font-size: 20px; }
+  }
   .holi { display: none; font-family: "Noto Sans JP", sans-serif; font-size: 11px; color: var(--sub); margin-top: 6px; min-height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
