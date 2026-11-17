@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clock Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /*
+    時計ウィジェット（Notion埋め込み用）
+    - ?theme=dark でダーク表示（省略時はライト）
+    - &accent=337EA9（#なしの16進数）  &name=名前（あいさつに名前を入れる）
+  */
+  :root {
+    --accent: #337EA9;
+    --bg: #ffffff;
+    --panel: #f7f8fa;
+    --line: rgba(15, 30, 50, 0.08);
+    --text: #1f2328;
+    --sub: #8a8f98;
+    --track: rgba(15, 30, 50, 0.07);
+  }
+  :root[data-theme="dark"] {
+    --bg: #191919;
+    --panel: #202122;
+    --line: rgba(255, 255, 255, 0.08);
+    --text: #ecedee;
+    --sub: #8e9196;
+    --track: rgba(255, 255, 255, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); }
+  body {
+    font-family: "Space Grotesk", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    color: var(--text);
+    padding: 6px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    height: 100%;
+    min-height: 220px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .label { font-family: "Noto Sans JP", sans-serif; font-size: 11px; letter-spacing: 0.2em; color: var(--accent); font-weight: 500; }
+  .main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .time {
+    font-size: clamp(44px, 19vw, 72px);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+  }
+  .colon { color: var(--accent); margin: 0 0.02em; position: relative; top: -0.06em; }
+  .sec { font-size: 0.32em; color: var(--sub); margin-left: 8px; font-weight: 400; letter-spacing: 0; }
+  .date { font-family: "Noto Sans JP", sans-serif; font-size: 14px; margin-top: 12px; font-weight: 500; }
+  .greet { font-family: "Noto Sans JP", sans-serif; font-size: 12px; color: var(--sub); margin-top: 4px; }
+  .day { margin-top: auto; }
+  .day .top { display: flex; justify-content: space-between; font-family: "Noto Sans JP", sans-serif; font-size: 11px; color: var(--sub); }
+  .track { height: 4px; border-radius: 99px; background: var(--track); margin-top: 6px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .6s ease; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">時計</div>
+  <div class="main">
+    <div class="time"><span id="h">--</span><span class="colon">:</span><span id="m">--</span><span class="sec" id="s">--</span></div>
+    <div class="date" id="date"></div>
+    <div class="greet" id="greet"></div>
+  </div>
+  <div class="day">
+    <div class="top"><span>今日の経過</span><span id="pct">0%</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.documentElement.dataset.theme = q.get("theme") === "dark" ? "dark" : "light";
+  if (/^[0-9a-fA-F]{6}$/.test(q.get("accent") || "")) document.documentElement.style.setProperty("--accent", "#" + q.get("accent"));
+  const NAME = q.get("name") || "";
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const WD = ["日", "月", "火", "水", "木", "金", "土"];
+  function tick() {
+    const d = new Date();
+    $("h").textContent = pad(d.getHours());
+    $("m").textContent = pad(d.getMinutes());
+    $("s").textContent = pad(d.getSeconds());
+    $("date").textContent = d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（" + WD[d.getDay()] + "）";
+    const h = d.getHours();
+    const g = h < 5 ? "夜ふかしはほどほどに" : h < 11 ? "おはようございます" : h < 18 ? "こんにちは" : "おつかれさまです";
+    $("greet").textContent = NAME ? g + "、" + NAME + "さん" : g;
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const pct = Math.floor(((d - start) / 864e5) * 100);
+    $("pct").textContent = pct + "%";
+    $("fill").style.width = pct + "%";
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
